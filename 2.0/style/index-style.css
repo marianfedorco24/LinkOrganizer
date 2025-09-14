@@ -1,0 +1,25 @@
+html {
+    background-color: rgb(232, 232, 232);
+    font-family: Quicksand;
+}
+
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+#title {
+    font-weight: 550;
+    margin: 0;
+    text-align: center;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    align-self: center;
+}
+
+#logo {
+    height: 2.5rem;
+}
