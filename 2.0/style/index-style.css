@@ -3,6 +3,14 @@ html {
     font-family: Quicksand;
 }
 
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
 #header {
     display: flex;
     flex-direction: row;
@@ -22,4 +30,158 @@ html {
 
 #logo {
     height: 2.5rem;
+}
+
+.btn-hide {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+.nav-panel-btn-cont-icon {
+    fill: rgb(97, 110, 234);
+    max-height: 1.75rem;
+    max-width: 2rem;
+}
+
+#window {
+    background: linear-gradient(to bottom, rgb(241, 242, 252), rgb(255, 255, 255));
+    width: 90%;
+    height: 80vh;
+    max-width: 30rem;
+    border-radius: 2.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+#nav-panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.nav-panel-btn-cont {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    background-color: rgb(210, 214, 249);
+    padding: 1rem;
+    border-radius: 3rem;
+}
+
+.nav-panel-btn-cont-separator {
+    width: 0.2rem;
+    height: 2rem;
+    border-radius: 1rem;
+    background-color: rgb(142, 152, 240);
+}
+
+.window-item {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr 2rem;
+    height: 3rem;
+    padding: 0.5rem 1rem;
+    border-radius: 1.75rem;
+}
+
+.window-item-icon {
+    grid-column: 1;
+    width: 2.5rem;
+    height: 3rem;
+    align-self: center;
+    justify-self: center;
+}
+
+.window-item-text {
+    grid-column: 2;
+    height: 2rem;
+    align-self: center;
+    justify-self: left;
+    margin: 0;
+    height: fit-content;
+    font-size: 1.25rem;
+    font-weight: 550;
+    padding-left: 0.75rem;
+    color: rgb(30, 30, 30);
+}
+
+.window-item-more-btn {
+    grid-column: 3;
+    width: 1.5rem;
+    height: 2rem;
+}
+
+.red {
+    background-color: rgb(255, 185, 185);
+    border: solid 0.15rem rgb(255, 128, 128);
+}
+.red :nth-child(1),
+.red :nth-child(3) {
+    fill: rgb(219, 87, 87);
+}
+
+.yellow {
+    background-color: rgb(255, 247, 204);
+    border: solid 0.15rem rgb(255, 238, 153);
+}
+.yellow :nth-child(1),
+.yellow :nth-child(3) {
+    fill: rgb(189, 164, 40);
+}
+
+.green {
+    background-color: rgb(217, 255, 204, 1);
+    border: solid 0.15rem rgb(179, 255, 153);
+}
+.green :nth-child(1),
+.green :nth-child(3) {
+    fill: rgb(78, 190, 39);
+}
+
+.blue {
+    background-color: rgb(204, 247, 255);
+    border: solid 0.15rem rgb(153, 238, 255);
+}
+.blue :nth-child(1),
+.blue :nth-child(3) {
+    fill: rgb(40, 164, 189);
+}
+
+.purple {
+    background-color: rgb(212, 204, 255);
+    border: solid 0.15rem rgb(170, 153, 255);
+}
+.purple :nth-child(1),
+.purple :nth-child(3) {
+    fill: rgb(127, 108, 224);
+}
+
+.pink {
+    background-color: rgb(255, 204, 255);
+    border: solid 0.15rem rgb(255, 153, 255);
+}
+.pink :nth-child(1),
+.pink :nth-child(3) {
+    fill: rgb(198, 83, 198);
+}
+
+.orange {
+    background-color: rgb(255, 206, 189);
+    border: solid 0.15rem rgb(255, 162, 128);
+}
+.orange :nth-child(1),
+.orange :nth-child(3) {
+    fill: rgb(215, 105, 66);
+}
+
+.white {
+    background-color: rgb(249, 249, 249);
+    border: solid 0.15rem rgb(216, 216, 216);
+}
+.white :nth-child(1),
+.white :nth-child(3) {
+    fill: rgb(147, 147, 147);
 }
