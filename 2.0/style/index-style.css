@@ -79,6 +79,12 @@ body {
     background-color: rgb(142, 152, 240);
 }
 
+#window-item-cont {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
 .window-item {
     display: grid;
     grid-template-columns: 2.5rem 1fr 2rem;
