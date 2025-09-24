@@ -17,6 +17,7 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
     gap: 0.5rem;
     margin-top: 1rem;
 }
@@ -121,6 +122,11 @@ body {
     font-weight: 550;
     padding-left: 0.75rem;
     color: rgb(30, 30, 30);
+    display: inline-block;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .window-item-more-btn {
@@ -384,4 +390,8 @@ body {
     background-color: rgba(40, 164, 189, 0.6);
     border-radius: 1rem;
     align-self: center;
+}
+
+#logo-a {
+    height: 40px;
 }

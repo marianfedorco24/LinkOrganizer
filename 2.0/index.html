@@ -13,8 +13,10 @@
     </head>
     <body>
         <header id="header">
-            <img id="logo" src="assets/fedorcodev_logo.png"
-                alt="fedorco.dev logo">
+            <a id="logo-a" href="https://fedorco.dev">
+                <img id="logo" src="assets/fedorcodev_logo.png"
+                    alt="fedorco.dev logo">
+            </a>
             <h1 id="title">Link Organizer</h1>
         </header>
         <main id="window">
@@ -68,11 +70,17 @@
         <svg id="color-check"><use
                 href="/assets/icons/ui-icons.svg#check"></use></svg>
         <div id="edit-popup">
-            <svg class="edit-popup-icon"><use
-                    href="/assets/icons/ui-icons.svg#edit"></use></svg>
+            <button data-buttontype="edit"
+                class="btn-hide cursor-pointer-darken">
+                <svg class="edit-popup-icon"><use
+                        href="/assets/icons/ui-icons.svg#edit"></use></svg>
+            </button>
             <div id="edit-popup-separator"></div>
-            <svg class="edit-popup-icon"><use
-                    href="/assets/icons/ui-icons.svg#delete"></use></svg>
+            <button data-buttontype="delete"
+                class="btn-hide cursor-pointer-darken">
+                <svg class="edit-popup-icon"><use
+                        href="/assets/icons/ui-icons.svg#delete"></use></svg>
+            </button>
         </div>
         <script src="script/index-script.js"></script>
     </body>

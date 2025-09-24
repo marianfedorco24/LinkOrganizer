@@ -10,17 +10,6 @@ const colorCheck = document.getElementById("color-check");
 const editPopup = document.getElementById("edit-popup");
 
 const svgNS = "http://www.w3.org/2000/svg";
-
-backdrop.addEventListener("click", hideNewItemWindow);
-document.addEventListener("click", e => {
-    if (editPopup.style.display !== "none" && !editPopup.contains(e.target)) {
-        editPopupHide();
-    }
-});
-editPopup.addEventListener("click", e => {
-    e.stopPropagation();
-});
-
 const colors = {
     white: ["rgb(216, 216, 216)", "rgb(147, 147, 147)"],
     red: ["rgb(255, 128, 128)", "rgb(219, 87, 87)"],
@@ -31,10 +20,58 @@ const colors = {
     purple: ["rgb(170, 153, 255)", "rgb(127, 108, 224)"],
     pink: ["rgb(255, 153, 255)", "rgb(198, 83, 198)"],
 };
+let currentEditId;
+
+backdrop.addEventListener("click", hideNewItemWindow);
+document.addEventListener("click", e => {
+    if (editPopup.style.display !== "none" && !editPopup.contains(e.target)) {
+        editPopupHide();
+    }
+});
+
+windowItemCont.addEventListener("click", e => {
+    const moreButtonSvg = e.target.closest(".window-item-more-btn");
+    if (moreButtonSvg) {
+        e.stopPropagation();
+        moreButtonFc(moreButtonSvg.parentNode);
+        return;
+    }
+    if (e.target.closest("#edit-popup")) {
+        e.stopPropagation();
+        const button = e.target.closest(".edit-popup-icon").parentNode;
+        if (button.dataset.buttontype == "edit") {
+            const itemEl = e.target.closest(".window-item");
+            const {id, type, icon, name, link, color} = itemEl.dataset;
+            currentEditId = id;
+            displayEditItemWindow(name, type, icon, color, link);
+        } else {
+            console.log("delete");
+        }
+        return;
+    }
+
+    const itemEl = e.target.closest(".window-item");
+    if (!itemEl) return;
+    if (itemEl.dataset.type == "folder") {
+        loadDir(itemEl.dataset.id);
+    } else {
+        window.open(itemEl.dataset.link, "_blank");
+    }
+});
 
 function loadItem({id, pid, type, icon, name, link, color}) {
     const itemElement = document.createElement("div");
     itemElement.classList.add("window-item", "cursor-pointer", color);
+
+    itemElement.dataset.id = String(id);
+    itemElement.dataset.type = type;
+    if (type == "link") {
+        itemElement.dataset.link = link;
+    }
+    itemElement.dataset.color = color;
+    itemElement.dataset.name = name;
+    itemElement.dataset.icon = icon;
+
     windowItemCont.appendChild(itemElement);
 
     const iconElement = document.createElementNS(svgNS, "svg");
@@ -42,6 +79,11 @@ function loadItem({id, pid, type, icon, name, link, color}) {
     itemElement.appendChild(iconElement);
 
     const useElement = document.createElementNS(svgNS, "use");
+    if (type == "folder") {
+        useElement.setAttribute("href", "assets/icons/item-icons.svg#" + icon);
+    } else {
+        useElement.setAttribute("href", "assets/icons/item-icons.svg#" + icon);
+    }
     iconElement.appendChild(useElement);
 
     const labelElement = document.createElement("span");
@@ -51,7 +93,6 @@ function loadItem({id, pid, type, icon, name, link, color}) {
 
     const moreButtonBtnElement = document.createElement("button");
     moreButtonBtnElement.classList.add("btn-hide", "cursor-pointer-darken");
-    moreButtonBtnElement.addEventListener("click", moreButtonFc);
     itemElement.appendChild(moreButtonBtnElement);
 
     const moreButtonSvgElement = document.createElementNS(svgNS, "svg");
@@ -61,18 +102,6 @@ function loadItem({id, pid, type, icon, name, link, color}) {
     const moreButtonUseElement = document.createElementNS(svgNS, "use");
     moreButtonUseElement.setAttribute("href", "assets/icons/ui-icons.svg#more");
     moreButtonSvgElement.appendChild(moreButtonUseElement);
-
-    if (type == "folder") {
-        useElement.setAttribute("href", "assets/icons/item-icons.svg#" + icon);
-        itemElement.addEventListener("click", () => {
-            loadDir(id);
-        });
-    } else {
-        useElement.setAttribute("href", "assets/icons/link-icons.svg#" + icon);
-        itemElement.addEventListener("click", () => {
-            window.open(link, "_blank");
-        });
-    }
 }
 
 function loadDir(id) {
@@ -87,8 +116,8 @@ function loadDir(id) {
             pid: 0,
             uid: 101,
             type: "folder",
-            icon: "math-link",
-            name: "Projects",
+            icon: "math-folder",
+            name: "Math",
             link: null,
             color: "blue",
         },
@@ -97,79 +126,89 @@ function loadDir(id) {
             pid: 1,
             uid: 101,
             type: "link",
-            icon: "history-link",
-            name: "GitHub",
-            link: "https://github.com",
-            color: "red",
-        },
-        {
-            id: 3,
-            pid: 1,
-            uid: 101,
-            type: "link",
-            icon: "file-doc",
-            name: "Docs",
-            link: "https://developer.mozilla.org",
+            icon: "math-link",
+            name: "Algebra Notes",
+            link: "https://example.com/algebra.pdf",
             color: "green",
         },
         {
-            id: 4,
+            id: 3,
             pid: 0,
             uid: 101,
             type: "folder",
             icon: "biology-folder",
-            name: "School",
+            name: "Biology stupidly long name don pollo salsa y pikante",
             link: null,
             color: "yellow",
         },
         {
-            id: 5,
-            pid: 4,
+            id: 4,
+            pid: 3,
             uid: 101,
             type: "link",
-            icon: "file-pdf",
-            name: "Math PDF",
-            link: "https://example.com/math.pdf",
+            icon: "biology-link",
+            name: "Cell Structure",
+            link: "https://example.com/cell-structure",
             color: "red",
         },
         {
-            id: 4,
+            id: 5,
             pid: 0,
             uid: 101,
             type: "folder",
-            icon: "biology-folder",
-            name: "School",
+            icon: "history-folder",
+            name: "History",
             link: null,
-            color: "yellow",
+            color: "purple",
         },
         {
-            id: 5,
-            pid: 4,
+            id: 6,
+            pid: 5,
             uid: 101,
             type: "link",
-            icon: "file-pdf",
-            name: "Math PDF",
-            link: "https://example.com/math.pdf",
-            color: "red",
+            icon: "history-link",
+            name: "World War II",
+            link: "https://example.com/ww2-article",
+            color: "orange",
         },
         {
-            id: 4,
+            id: 7,
             pid: 0,
             uid: 101,
             type: "folder",
-            icon: "biology-folder",
-            name: "School",
+            icon: "coding-folder",
+            name: "Coding",
             link: null,
-            color: "yellow",
+            color: "pink",
         },
         {
-            id: 5,
-            pid: 4,
+            id: 8,
+            pid: 7,
             uid: 101,
             type: "link",
-            icon: "file-pdf",
-            name: "Math PDF",
-            link: "https://example.com/math.pdf",
+            icon: "coding-link",
+            name: "MDN JavaScript",
+            link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+            color: "blue",
+        },
+        {
+            id: 9,
+            pid: 0,
+            uid: 101,
+            type: "folder",
+            icon: "physics-folder",
+            name: "Physics",
+            link: null,
+            color: "green",
+        },
+        {
+            id: 10,
+            pid: 9,
+            uid: 101,
+            type: "link",
+            icon: "physics-link",
+            name: "Kinematics",
+            link: "https://example.com/kinematics",
             color: "red",
         },
     ];
@@ -219,7 +258,7 @@ function loadColors() {
         colorDiv.id = "new-item-window-color-" + color;
         colorDiv.style.backgroundColor = colors[color][0];
         colorDiv.style.borderColor = colors[color][1];
-        colorDiv.classList.add("new-item-window-color");
+        colorDiv.classList.add("new-item-window-color", "cursor-pointer-darken");
         colorDiv.addEventListener("click", e => {
             selectColor(e);
         });
@@ -249,33 +288,35 @@ function hideNewItemWindow() {
     selectColor();
 }
 
-function selectIcon(e) {
+function selectIcon(targetOrEvent) {
     [...newItemWindowIconWrapper.children].forEach(icon => {
         icon.classList.remove("new-item-window-icon-selected");
     });
-    if (!e) {
+    if (!targetOrEvent) {
         newItemWindowIconWrapper.firstChild.classList.add("new-item-window-icon-selected");
+    } else if (targetOrEvent.currentTarget) {
+        targetOrEvent.currentTarget.classList.add("new-item-window-icon-selected");
     } else {
-        e.currentTarget.classList.add("new-item-window-icon-selected");
+        targetOrEvent.classList.add("new-item-window-icon-selected");
     }
 }
 
-function selectColor(e) {
+function selectColor(targetOrEvent) {
     let colorDiv;
-    if (!e) {
-        colorDiv = newItemWindowColorWrapper.firstChild;
+    if (!targetOrEvent) {
+        colorDiv = newItemWindowColorWrapper.firstChild; // default
+    } else if (targetOrEvent.currentTarget) {
+        colorDiv = targetOrEvent.currentTarget; // called from click handler
     } else {
-        colorDiv = e.currentTarget;
+        colorDiv = targetOrEvent; // direct element passed in
     }
     colorDiv.appendChild(colorCheck);
     colorCheck.style.fill = colorDiv.style.borderColor;
 }
 
-function moreButtonFc(e) {
-    e.stopPropagation();
+function moreButtonFc(button) {
     editPopupHide();
     editPopup.style.display = "flex";
-    const button = e.currentTarget;
     const item = button.parentNode;
     const color = item.classList[2];
 
@@ -296,8 +337,23 @@ function editPopupHide() {
     editPopup.style.display = "none";
 }
 
+function displayEditItemWindow(name, type, icon, color, link) {
+    newItemWindowTitle.innerHTML = "Edit a " + type;
+    newItemWindowInputName.value = name;
+    if (type == "folder") {
+        newItemWindowInputLink.classList.add("hide");
+    } else {
+        newItemWindowInputLink.classList.remove("hide");
+        newItemWindowInputLink.value = link;
+    }
+    loadIcons(type);
+    selectIcon([...newItemWindowIconWrapper.children].find(item => item.id.includes(icon)));
+    selectColor([...newItemWindowColorWrapper.children].find(item => item.id.includes(color)));
+
+    backdrop.classList.remove("hide");
+    newItemWindow.classList.remove("hide");
+}
+
 editPopupHide();
-
 loadColors();
-
-loadDir(null);
+loadDir();
