@@ -1,14 +1,36 @@
 const windowItemCont = document.getElementById("window-item-cont");
 const newItemWindowIconWrapper = document.getElementById("new-item-window-icon-wrapper");
+const newItemWindowColorWrapper = document.getElementById("new-item-window-color-wrapper");
 const newItemWindowTitle = document.getElementById("new-item-window-title");
 const newItemWindowInputName = document.getElementById("input-name");
 const newItemWindowInputLink = document.getElementById("input-link");
 const backdrop = document.getElementById("backdrop");
 const newItemWindow = document.getElementById("new-item-window");
+const colorCheck = document.getElementById("color-check");
+const editPopup = document.getElementById("edit-popup");
 
 const svgNS = "http://www.w3.org/2000/svg";
 
 backdrop.addEventListener("click", hideNewItemWindow);
+document.addEventListener("click", e => {
+    if (editPopup.style.display !== "none" && !editPopup.contains(e.target)) {
+        editPopupHide();
+    }
+});
+editPopup.addEventListener("click", e => {
+    e.stopPropagation();
+});
+
+const colors = {
+    white: ["rgb(216, 216, 216)", "rgb(147, 147, 147)"],
+    red: ["rgb(255, 128, 128)", "rgb(219, 87, 87)"],
+    orange: ["rgb(255, 162, 128)", "rgb(215, 105, 66)"],
+    yellow: ["rgb(255, 238, 153)", "rgb(189, 164, 40)"],
+    green: ["rgb(179, 255, 153)", "rgb(78, 190, 39)"],
+    blue: ["rgb(153, 238, 255)", "rgb(40, 164, 189)"],
+    purple: ["rgb(170, 153, 255)", "rgb(127, 108, 224)"],
+    pink: ["rgb(255, 153, 255)", "rgb(198, 83, 198)"],
+};
 
 function loadItem({id, pid, type, icon, name, link, color}) {
     const itemElement = document.createElement("div");
@@ -191,6 +213,21 @@ function loadIcons(type) {
     });
 }
 
+function loadColors() {
+    for (const color in colors) {
+        const colorDiv = document.createElement("div");
+        colorDiv.id = "new-item-window-color-" + color;
+        colorDiv.style.backgroundColor = colors[color][0];
+        colorDiv.style.borderColor = colors[color][1];
+        colorDiv.classList.add("new-item-window-color");
+        colorDiv.addEventListener("click", e => {
+            selectColor(e);
+        });
+        newItemWindowColorWrapper.appendChild(colorDiv);
+    }
+    selectColor();
+}
+
 function displayNewItemWindow(type) {
     newItemWindowTitle.innerHTML = "New " + type;
     if (type == "folder") {
@@ -209,6 +246,7 @@ function hideNewItemWindow() {
     newItemWindowInputLink.value = "";
     backdrop.classList.add("hide");
     newItemWindow.classList.add("hide");
+    selectColor();
 }
 
 function selectIcon(e) {
@@ -222,9 +260,44 @@ function selectIcon(e) {
     }
 }
 
+function selectColor(e) {
+    let colorDiv;
+    if (!e) {
+        colorDiv = newItemWindowColorWrapper.firstChild;
+    } else {
+        colorDiv = e.currentTarget;
+    }
+    colorDiv.appendChild(colorCheck);
+    colorCheck.style.fill = colorDiv.style.borderColor;
+}
+
 function moreButtonFc(e) {
     e.stopPropagation();
-    console.log("test");
+    editPopupHide();
+    editPopup.style.display = "flex";
+    const button = e.currentTarget;
+    const item = button.parentNode;
+    const color = item.classList[2];
+
+    button.style.display = "none";
+    item.appendChild(editPopup);
+
+    editPopup.children[1].style.backgroundColor = colors[color][1];
+    editPopup.children[1].style.opacity = "0.5";
+
+    editPopup.style.backgroundColor = colors[color][0].replace("rgb", "rgba").replace(")", ", 0.5");
 }
+
+function editPopupHide() {
+    [...windowItemCont.children].forEach(i => {
+        i.children[2].style.display = "block";
+    });
+    newItemWindow.appendChild(editPopup);
+    editPopup.style.display = "none";
+}
+
+editPopupHide();
+
+loadColors();
 
 loadDir(null);

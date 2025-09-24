@@ -53,6 +53,7 @@
                     <input type="text" id="input-link"
                         class="new-item-window-input" placeholder="Link">
                 </form>
+                <div id="new-item-window-color-wrapper"></div>
                 <div id="new-item-window-icon-wrapper"></div>
                 <div id="new-item-window-confirm-btn-wrapper">
                     <button id="new-item-window-cancel-btn"
@@ -64,6 +65,15 @@
             </div>
         </main>
         <div class="hide" id="backdrop"></div>
+        <svg id="color-check"><use
+                href="/assets/icons/ui-icons.svg#check"></use></svg>
+        <div id="edit-popup">
+            <svg class="edit-popup-icon"><use
+                    href="/assets/icons/ui-icons.svg#edit"></use></svg>
+            <div id="edit-popup-separator"></div>
+            <svg class="edit-popup-icon"><use
+                    href="/assets/icons/ui-icons.svg#delete"></use></svg>
+        </div>
         <script src="script/index-script.js"></script>
     </body>
 </html>
