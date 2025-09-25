@@ -14,7 +14,7 @@
     <body>
         <header id="header">
             <a id="logo-a" href="https://fedorco.dev">
-                <img id="logo" src="assets/fedorcodev_logo.png"
+                <img id="logo" src="assets/fedorcodev_logo.svg"
                     alt="fedorco.dev logo">
             </a>
             <h1 id="title">Link Organizer</h1>
@@ -46,7 +46,27 @@
                     </button>
                 </div>
             </nav>
-            <div id="window-item-cont"></div>
+            <div id="window-item-cont">
+                <div id="no-items-div">
+                    <div class="alert-icon-cont">
+                        <svg id="no-items-div-icon"><use
+                                href="assets/icons/ui-icons.svg#magnifier"></use></svg>
+                        <span id="no-items-div-text">No items yet!</span>
+                    </div>
+                    <div id="no-items-div-buttons-cont">
+                        <button id="no-items-div-folder-btn"
+                            class="button-default cursor-pointer-darken"
+                            onclick="displayNewItemWindow('folder')">Create
+                            a new
+                            folder</button>
+                        <button id="no-items-div-link-btn"
+                            class="button-default cursor-pointer-darken"
+                            onclick="displayNewItemWindow('link')">Add a
+                            new
+                            link</button>
+                    </div>
+                </div>
+            </div>
             <div class="hide" id="new-item-window">
                 <h1 id="new-item-window-title"></h1>
                 <form id="new-item-window-inputs-wrapper">
@@ -67,9 +87,9 @@
             </div>
         </main>
         <div class="hide" id="backdrop"></div>
-        <svg id="color-check"><use
+        <svg class="hide" id="color-check"><use
                 href="/assets/icons/ui-icons.svg#check"></use></svg>
-        <div id="edit-popup">
+        <div id="edit-popup" class="hide">
             <button data-buttontype="edit"
                 class="btn-hide cursor-pointer-darken">
                 <svg class="edit-popup-icon"><use
@@ -82,6 +102,41 @@
                         href="/assets/icons/ui-icons.svg#delete"></use></svg>
             </button>
         </div>
+        <div class="hide" id="not-logged-in-window">
+            <div class="alert-icon-cont">
+                <svg id="not-logged-in-window-icon"><use
+                        href="assets/icons/ui-icons.svg#not-logged-in"></use></svg>
+                <span id="not-logged-in-window-text">You are not logged
+                    in.<br>Log in via your fedorco.dev account to use across
+                    all
+                    my projects.</span>
+            </div>
+            <button id="not-logged-in-window-fedorcodev-button"
+                class="cursor-pointer-darken">
+                <svg id="not-logged-in-window-fedorcodev-icon"><use
+                        href="assets/icons/ui-icons.svg#fedorcodev-logo-transparent"></use></svg>
+
+                <span id="not-logged-in-window-fedorcodev-text">Continue with
+                    fedorco.dev</span>
+            </button>
+        </div>
+
+        <div class="hide" id="delete-item-window">
+            <div id="delete-item-window-text-cont">
+                <span id="delete-item-window-title">Delete item</span>
+                <span id="delete-item-window-subtitle">Are you sure you want
+                    to
+                    delete this item?</span>
+            </div>
+            <div id="delete-item-window-buttons-cont">
+                <button id="delete-item-window-button-delete"
+                    class="button-default cursor-pointer-darken">Delete</button>
+                <button
+                    class="button-default cursor-pointer-darken"
+                    onclick="hideDeleteItemWindow()">Cancel</button>
+            </div>
+        </div>
+
         <script src="script/index-script.js"></script>
     </body>
 </html>

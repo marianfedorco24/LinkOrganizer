@@ -8,6 +8,8 @@ const backdrop = document.getElementById("backdrop");
 const newItemWindow = document.getElementById("new-item-window");
 const colorCheck = document.getElementById("color-check");
 const editPopup = document.getElementById("edit-popup");
+const notLoggedInWindow = document.getElementById("not-logged-in-window");
+const deleteItemWindow = document.getElementById("delete-item-window");
 
 const svgNS = "http://www.w3.org/2000/svg";
 const colors = {
@@ -20,7 +22,20 @@ const colors = {
     purple: ["rgb(170, 153, 255)", "rgb(127, 108, 224)"],
     pink: ["rgb(255, 153, 255)", "rgb(198, 83, 198)"],
 };
-let currentEditId;
+const icons = [
+    "",
+    "biology-",
+    "chemistry-",
+    "coding-",
+    "cooking-",
+    "geography-",
+    "history-",
+    "languages-",
+    "math-",
+    "physics-",
+    "social-studies-",
+];
+let selectedItemId;
 
 backdrop.addEventListener("click", hideNewItemWindow);
 document.addEventListener("click", e => {
@@ -42,10 +57,12 @@ windowItemCont.addEventListener("click", e => {
         if (button.dataset.buttontype == "edit") {
             const itemEl = e.target.closest(".window-item");
             const {id, type, icon, name, link, color} = itemEl.dataset;
-            currentEditId = id;
+            selectedItemId = Number(id);
             displayEditItemWindow(name, type, icon, color, link);
         } else {
-            console.log("delete");
+            const itemEl = e.target.closest(".window-item");
+            selectedItemId = Number(itemEl.dataset.id);
+            displayDeleteItemWindow();
         }
         return;
     }
@@ -57,6 +74,14 @@ windowItemCont.addEventListener("click", e => {
     } else {
         window.open(itemEl.dataset.link, "_blank");
     }
+});
+newItemWindowIconWrapper.addEventListener("click", e => {
+    const icon = e.target.closest(".new-item-window-icon");
+    selectIcon(icon);
+});
+newItemWindowColorWrapper.addEventListener("click", e => {
+    const color = e.target.closest(".new-item-window-color");
+    selectColor(color);
 });
 
 function loadItem({id, pid, type, icon, name, link, color}) {
@@ -225,25 +250,10 @@ function loadDir(id) {
 function loadIcons(type) {
     newItemWindowIconWrapper.innerHTML = "";
 
-    const icons = [
-        "",
-        "biology-",
-        "chemistry-",
-        "coding-",
-        "cooking-",
-        "geography-",
-        "history-",
-        "languages-",
-        "math-",
-        "physics-",
-        "social-studies-",
-    ];
-
     icons.forEach(icon => {
         const iconSvg = document.createElementNS(svgNS, "svg");
         iconSvg.classList.add("new-item-window-icon", "cursor-pointer-darken");
         iconSvg.setAttribute("id", "new-item-window-" + icon + type + "-icon");
-        iconSvg.addEventListener("click", selectIcon);
         newItemWindowIconWrapper.appendChild(iconSvg);
 
         const itemUse = document.createElementNS(svgNS, "use");
@@ -259,23 +269,20 @@ function loadColors() {
         colorDiv.style.backgroundColor = colors[color][0];
         colorDiv.style.borderColor = colors[color][1];
         colorDiv.classList.add("new-item-window-color", "cursor-pointer-darken");
-        colorDiv.addEventListener("click", e => {
-            selectColor(e);
-        });
         newItemWindowColorWrapper.appendChild(colorDiv);
     }
     selectColor();
 }
 
 function displayNewItemWindow(type) {
+    loadIcons(type);
+    selectIcon();
     newItemWindowTitle.innerHTML = "New " + type;
     if (type == "folder") {
         newItemWindowInputLink.classList.add("hide");
     } else {
         newItemWindowInputLink.classList.remove("hide");
     }
-    loadIcons(type);
-    selectIcon();
     backdrop.classList.remove("hide");
     newItemWindow.classList.remove("hide");
 }
@@ -310,17 +317,18 @@ function selectColor(targetOrEvent) {
     } else {
         colorDiv = targetOrEvent; // direct element passed in
     }
+    colorCheck.classList.remove("hide");
     colorDiv.appendChild(colorCheck);
     colorCheck.style.fill = colorDiv.style.borderColor;
 }
 
 function moreButtonFc(button) {
     editPopupHide();
-    editPopup.style.display = "flex";
+    editPopup.classList.remove("hide");
     const item = button.parentNode;
     const color = item.classList[2];
 
-    button.style.display = "none";
+    button.classList.add("hide");
     item.appendChild(editPopup);
 
     editPopup.children[1].style.backgroundColor = colors[color][1];
@@ -330,11 +338,14 @@ function moreButtonFc(button) {
 }
 
 function editPopupHide() {
-    [...windowItemCont.children].forEach(i => {
-        i.children[2].style.display = "block";
-    });
+    const items = [...document.querySelectorAll(".window-item")];
+    if (items) {
+        items.forEach(i => {
+            i.children[2].classList.remove("hide");
+        });
+    }
     newItemWindow.appendChild(editPopup);
-    editPopup.style.display = "none";
+    editPopup.classList.add("hide");
 }
 
 function displayEditItemWindow(name, type, icon, color, link) {
@@ -354,6 +365,20 @@ function displayEditItemWindow(name, type, icon, color, link) {
     newItemWindow.classList.remove("hide");
 }
 
-editPopupHide();
+function displayLoginWindow() {
+    backdrop.classList.remove("hide");
+    notLoggedInWindow.classList.remove("hide");
+}
+
+function displayDeleteItemWindow() {
+    backdrop.classList.remove("hide");
+    deleteItemWindow.classList.remove("hide");
+}
+
+function hideDeleteItemWindow() {
+    backdrop.classList.add("hide");
+    deleteItemWindow.classList.add("hide");
+}
+
 loadColors();
 loadDir();
