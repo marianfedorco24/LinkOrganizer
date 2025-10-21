@@ -12,6 +12,7 @@ const notLoggedInWindow = document.getElementById("not-logged-in-window");
 const deleteItemWindow = document.getElementById("delete-item-window");
 
 const svgNS = "http://www.w3.org/2000/svg";
+const apiBaseUrl = "http://127.0.0.1:5000/linkorganizer/";
 const colors = {
     white: ["rgb(216, 216, 216)", "rgb(147, 147, 147)"],
     red: ["rgb(255, 128, 128)", "rgb(219, 87, 87)"],
@@ -23,19 +24,25 @@ const colors = {
     pink: ["rgb(255, 153, 255)", "rgb(198, 83, 198)"],
 };
 const icons = [
-    "",
-    "biology-",
-    "chemistry-",
-    "coding-",
-    "cooking-",
-    "geography-",
-    "history-",
-    "languages-",
-    "math-",
-    "physics-",
-    "social-studies-",
+    "default",
+    "biology",
+    "chemistry",
+    "coding",
+    "cooking",
+    "geography",
+    "history",
+    "languages",
+    "math",
+    "physics",
+    "socialstudies",
 ];
-let selectedItemId;
+let itemState = {
+    id: "",
+    pid: "",
+    type: "",
+    icon: "",
+    color: "",
+};
 
 backdrop.addEventListener("click", hideNewItemWindow);
 document.addEventListener("click", e => {
@@ -57,11 +64,11 @@ windowItemCont.addEventListener("click", e => {
         if (button.dataset.buttontype == "edit") {
             const itemEl = e.target.closest(".window-item");
             const {id, type, icon, name, link, color} = itemEl.dataset;
-            selectedItemId = Number(id);
+            itemState.id = Number(id);
             displayEditItemWindow(name, type, icon, color, link);
         } else {
             const itemEl = e.target.closest(".window-item");
-            selectedItemId = Number(itemEl.dataset.id);
+            itemState.id = Number(itemEl.dataset.id);
             displayDeleteItemWindow();
         }
         return;
@@ -104,11 +111,7 @@ function loadItem({id, pid, type, icon, name, link, color}) {
     itemElement.appendChild(iconElement);
 
     const useElement = document.createElementNS(svgNS, "use");
-    if (type == "folder") {
-        useElement.setAttribute("href", "assets/icons/item-icons.svg#" + icon);
-    } else {
-        useElement.setAttribute("href", "assets/icons/item-icons.svg#" + icon);
-    }
+    useElement.setAttribute("href", "assets/icons/item-icons.svg#" + icon + "-" + type);
     iconElement.appendChild(useElement);
 
     const labelElement = document.createElement("span");
@@ -129,122 +132,25 @@ function loadItem({id, pid, type, icon, name, link, color}) {
     moreButtonSvgElement.appendChild(moreButtonUseElement);
 }
 
-function loadDir(id) {
-    console.log("loading the dir: ", id);
-    // here enter the fetch of the DB
-    //
-    // until here
+async function loadDir(pid) {
+    itemState.pid = pid;
+    try {
+        const response = await fetch(apiBaseUrl + `get-items?pid=${pid}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error while requesting data: ${response.status}`);
+        }
+        const data = await response.json();
 
-    const testData = [
-        {
-            id: 1,
-            pid: 0,
-            uid: 101,
-            type: "folder",
-            icon: "math-folder",
-            name: "Math",
-            link: null,
-            color: "blue",
-        },
-        {
-            id: 2,
-            pid: 1,
-            uid: 101,
-            type: "link",
-            icon: "math-link",
-            name: "Algebra Notes",
-            link: "https://example.com/algebra.pdf",
-            color: "green",
-        },
-        {
-            id: 3,
-            pid: 0,
-            uid: 101,
-            type: "folder",
-            icon: "biology-folder",
-            name: "Biology stupidly long name don pollo salsa y pikante",
-            link: null,
-            color: "yellow",
-        },
-        {
-            id: 4,
-            pid: 3,
-            uid: 101,
-            type: "link",
-            icon: "biology-link",
-            name: "Cell Structure",
-            link: "https://example.com/cell-structure",
-            color: "red",
-        },
-        {
-            id: 5,
-            pid: 0,
-            uid: 101,
-            type: "folder",
-            icon: "history-folder",
-            name: "History",
-            link: null,
-            color: "purple",
-        },
-        {
-            id: 6,
-            pid: 5,
-            uid: 101,
-            type: "link",
-            icon: "history-link",
-            name: "World War II",
-            link: "https://example.com/ww2-article",
-            color: "orange",
-        },
-        {
-            id: 7,
-            pid: 0,
-            uid: 101,
-            type: "folder",
-            icon: "coding-folder",
-            name: "Coding",
-            link: null,
-            color: "pink",
-        },
-        {
-            id: 8,
-            pid: 7,
-            uid: 101,
-            type: "link",
-            icon: "coding-link",
-            name: "MDN JavaScript",
-            link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
-            color: "blue",
-        },
-        {
-            id: 9,
-            pid: 0,
-            uid: 101,
-            type: "folder",
-            icon: "physics-folder",
-            name: "Physics",
-            link: null,
-            color: "green",
-        },
-        {
-            id: 10,
-            pid: 9,
-            uid: 101,
-            type: "link",
-            icon: "physics-link",
-            name: "Kinematics",
-            link: "https://example.com/kinematics",
-            color: "red",
-        },
-    ];
+        // clear the previous loaded items
+        windowItemCont.innerHTML = "";
 
-    // clear the previous loaded items
-    windowItemCont.innerHTML = "";
-
-    // go through each item and load it
-    testData.forEach(item => {
-        loadItem(item);
-    });
+        // go through each item and load it
+        data.forEach(item => {
+            loadItem(item);
+        });
+    } catch (error) {
+        console.error("Data fetch failed:", error);
+    }
 }
 
 function loadIcons(type) {
@@ -253,11 +159,11 @@ function loadIcons(type) {
     icons.forEach(icon => {
         const iconSvg = document.createElementNS(svgNS, "svg");
         iconSvg.classList.add("new-item-window-icon", "cursor-pointer-darken");
-        iconSvg.setAttribute("id", "new-item-window-" + icon + type + "-icon");
+        iconSvg.setAttribute("id", "new-item-window-" + icon + "-" + type + "-icon");
         newItemWindowIconWrapper.appendChild(iconSvg);
 
         const itemUse = document.createElementNS(svgNS, "use");
-        itemUse.setAttribute("href", "assets/icons/item-icons.svg#" + icon + type);
+        itemUse.setAttribute("href", "assets/icons/item-icons.svg#" + icon + "-" + type);
         iconSvg.appendChild(itemUse);
     });
 }
@@ -275,6 +181,7 @@ function loadColors() {
 }
 
 function displayNewItemWindow(type) {
+    itemState.type = type;
     loadIcons(type);
     selectIcon();
     newItemWindowTitle.innerHTML = "New " + type;
@@ -301,10 +208,10 @@ function selectIcon(targetOrEvent) {
     });
     if (!targetOrEvent) {
         newItemWindowIconWrapper.firstChild.classList.add("new-item-window-icon-selected");
-    } else if (targetOrEvent.currentTarget) {
-        targetOrEvent.currentTarget.classList.add("new-item-window-icon-selected");
+        itemState.icon = "default";
     } else {
         targetOrEvent.classList.add("new-item-window-icon-selected");
+        itemState.icon = targetOrEvent.id.split("-")[3];
     }
 }
 
@@ -312,10 +219,10 @@ function selectColor(targetOrEvent) {
     let colorDiv;
     if (!targetOrEvent) {
         colorDiv = newItemWindowColorWrapper.firstChild; // default
-    } else if (targetOrEvent.currentTarget) {
-        colorDiv = targetOrEvent.currentTarget; // called from click handler
+        itemState.color = "white";
     } else {
         colorDiv = targetOrEvent; // direct element passed in
+        itemState.color = targetOrEvent.id.split("-")[4];
     }
     colorCheck.classList.remove("hide");
     colorDiv.appendChild(colorCheck);
@@ -380,5 +287,17 @@ function hideDeleteItemWindow() {
     deleteItemWindow.classList.add("hide");
 }
 
+function createNewItem() {
+    data = {
+        name: newItemWindowInputName.value.trim(),
+        link: newItemWindowInputLink.value.trim(),
+        type: itemState.type,
+        pid: itemState.pid,
+        color: itemState.color,
+        icon: itemState.icon,
+    };
+    console.log(data);
+}
+
 loadColors();
-loadDir();
+loadDir(0);
