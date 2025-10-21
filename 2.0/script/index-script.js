@@ -77,6 +77,7 @@ windowItemCont.addEventListener("click", e => {
     const itemEl = e.target.closest(".window-item");
     if (!itemEl) return;
     if (itemEl.dataset.type == "folder") {
+        console.log(itemEl.dataset.id);
         loadDir(itemEl.dataset.id);
     } else {
         window.open(itemEl.dataset.link, "_blank");
@@ -91,11 +92,11 @@ newItemWindowColorWrapper.addEventListener("click", e => {
     selectColor(color);
 });
 
-function loadItem({id, pid, type, icon, name, link, color}) {
+function loadItem({iid, pid, type, icon, name, link, color}) {
     const itemElement = document.createElement("div");
     itemElement.classList.add("window-item", "cursor-pointer", color);
 
-    itemElement.dataset.id = String(id);
+    itemElement.dataset.id = String(iid);
     itemElement.dataset.type = type;
     if (type == "link") {
         itemElement.dataset.link = link;
@@ -146,6 +147,7 @@ async function loadDir(pid) {
 
         // go through each item and load it
         data.forEach(item => {
+            console.log(item);
             loadItem(item);
         });
     } catch (error) {
@@ -287,16 +289,39 @@ function hideDeleteItemWindow() {
     deleteItemWindow.classList.add("hide");
 }
 
-function createNewItem() {
-    data = {
-        name: newItemWindowInputName.value.trim(),
-        link: newItemWindowInputLink.value.trim(),
-        type: itemState.type,
-        pid: itemState.pid,
-        color: itemState.color,
-        icon: itemState.icon,
-    };
-    console.log(data);
+function clearItems() {
+    const items = document.querySelectorAll(".window-item");
+    items.forEach(item => item.remove());
+}
+
+async function createNewItem() {
+    try {
+        const data = {
+            name: newItemWindowInputName.value.trim(),
+            link: newItemWindowInputLink.value.trim(),
+            type: itemState.type,
+            pid: itemState.pid,
+            color: itemState.color,
+            icon: itemState.icon,
+        };
+        const response = await fetch(apiBaseUrl + "add-item", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error while adding a new item: ${response.status}`);
+        }
+        const message = await response.json();
+        console.log(message);
+        hideNewItemWindow();
+        loadDir(itemState.pid);
+    } catch (error) {
+        console.error("Item creation failed:", error);
+    }
 }
 
 loadColors();
