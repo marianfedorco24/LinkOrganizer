@@ -20,7 +20,7 @@ const popupIcon = document.getElementById("popup-icon");
 const dirUpBtn = document.getElementById("dir-up-btn");
 
 const svgNS = "http://www.w3.org/2000/svg";
-const apiBaseUrl = "http://127.0.0.1:5000/linkorganizer/";
+const apiBaseUrl = "https://api.fedorco.dev/linkorganizer/";
 const colors = {
     white: ["rgb(216, 216, 216)", "rgb(147, 147, 147)"],
     red: ["rgb(255, 128, 128)", "rgb(219, 87, 87)"],
