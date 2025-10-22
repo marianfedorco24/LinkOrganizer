@@ -10,6 +10,10 @@ const colorCheck = document.getElementById("color-check");
 const editPopup = document.getElementById("edit-popup");
 const notLoggedInWindow = document.getElementById("not-logged-in-window");
 const deleteItemWindow = document.getElementById("delete-item-window");
+const noItemsDiv = document.getElementById("no-items-div");
+const newItemWindowConfirmBtn = document.getElementById("new-item-window-confirm-btn");
+
+const dirUpBtn = document.getElementById("dir-up-btn");
 
 const svgNS = "http://www.w3.org/2000/svg";
 const apiBaseUrl = "http://127.0.0.1:5000/linkorganizer/";
@@ -42,7 +46,10 @@ let itemState = {
     type: "",
     icon: "",
     color: "",
+    name: "",
+    link: "",
 };
+let dirList = [];
 
 backdrop.addEventListener("click", hideNewItemWindow);
 document.addEventListener("click", e => {
@@ -63,12 +70,11 @@ windowItemCont.addEventListener("click", e => {
         const button = e.target.closest(".edit-popup-icon").parentNode;
         if (button.dataset.buttontype == "edit") {
             const itemEl = e.target.closest(".window-item");
-            const {id, type, icon, name, link, color} = itemEl.dataset;
-            itemState.id = Number(id);
-            displayEditItemWindow(name, type, icon, color, link);
+            Object.assign(itemState, itemEl.dataset);
+            displayEditItemWindow();
         } else {
             const itemEl = e.target.closest(".window-item");
-            itemState.id = Number(itemEl.dataset.id);
+            Object.assign(itemState, itemEl.dataset);
             displayDeleteItemWindow();
         }
         return;
@@ -77,7 +83,6 @@ windowItemCont.addEventListener("click", e => {
     const itemEl = e.target.closest(".window-item");
     if (!itemEl) return;
     if (itemEl.dataset.type == "folder") {
-        console.log(itemEl.dataset.id);
         loadDir(itemEl.dataset.id);
     } else {
         window.open(itemEl.dataset.link, "_blank");
@@ -134,20 +139,40 @@ function loadItem({iid, pid, type, icon, name, link, color}) {
 }
 
 async function loadDir(pid) {
+    dirList.push(pid);
     itemState.pid = pid;
     try {
-        const response = await fetch(apiBaseUrl + `get-items?pid=${pid}`);
+        const response = await fetch(apiBaseUrl + `get-items?pid=${pid}`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
         if (!response.ok) {
             throw new Error(`HTTP error while requesting data: ${response.status}`);
         }
         const data = await response.json();
 
         // clear the previous loaded items
-        windowItemCont.innerHTML = "";
+        clearItems();
+
+        // if dir empty, display the no items placeholder
+        if (data.length == 0) {
+            displayNoItemsPlaceholder();
+        } else {
+            hideNoItemsPlaceholder();
+        }
+
+        // dim the dir up button if it is the home dir (0)
+        if (pid == 0) {
+            dirUpBtn.classList.add("btn-disable");
+        } else {
+            dirUpBtn.classList.remove("btn-disable");
+        }
 
         // go through each item and load it
         data.forEach(item => {
-            console.log(item);
             loadItem(item);
         });
     } catch (error) {
@@ -183,6 +208,8 @@ function loadColors() {
 }
 
 function displayNewItemWindow(type) {
+    newItemWindowConfirmBtn.innerHTML = "Create";
+    newItemWindowConfirmBtn.setAttribute("onclick", "createNewItem()");
     itemState.type = type;
     loadIcons(type);
     selectIcon();
@@ -257,18 +284,24 @@ function editPopupHide() {
     editPopup.classList.add("hide");
 }
 
-function displayEditItemWindow(name, type, icon, color, link) {
-    newItemWindowTitle.innerHTML = "Edit a " + type;
-    newItemWindowInputName.value = name;
-    if (type == "folder") {
+function displayEditItemWindow() {
+    newItemWindowConfirmBtn.innerHTML = "Confirm";
+    newItemWindowConfirmBtn.setAttribute("onclick", "editItem()");
+    newItemWindowTitle.innerHTML = "Edit a " + itemState.type;
+    newItemWindowInputName.value = itemState.name;
+    if (itemState.type == "folder") {
         newItemWindowInputLink.classList.add("hide");
     } else {
         newItemWindowInputLink.classList.remove("hide");
-        newItemWindowInputLink.value = link;
+        newItemWindowInputLink.value = itemState.link;
     }
-    loadIcons(type);
-    selectIcon([...newItemWindowIconWrapper.children].find(item => item.id.includes(icon)));
-    selectColor([...newItemWindowColorWrapper.children].find(item => item.id.includes(color)));
+    loadIcons(itemState.type);
+    selectIcon(
+        [...newItemWindowIconWrapper.children].find(item => item.id.includes(itemState.icon)),
+    );
+    selectColor(
+        [...newItemWindowColorWrapper.children].find(item => item.id.includes(itemState.color)),
+    );
 
     backdrop.classList.remove("hide");
     newItemWindow.classList.remove("hide");
@@ -294,6 +327,14 @@ function clearItems() {
     items.forEach(item => item.remove());
 }
 
+function displayNoItemsPlaceholder() {
+    noItemsDiv.classList.remove("hide");
+}
+
+function hideNoItemsPlaceholder() {
+    noItemsDiv.classList.add("hide");
+}
+
 async function createNewItem() {
     try {
         const data = {
@@ -316,11 +357,71 @@ async function createNewItem() {
             throw new Error(`HTTP error while adding a new item: ${response.status}`);
         }
         const message = await response.json();
-        console.log(message);
         hideNewItemWindow();
         loadDir(itemState.pid);
     } catch (error) {
         console.error("Item creation failed:", error);
+    }
+}
+
+function dirUp() {
+    dirList.pop();
+    loadDir(dirList.at(-1));
+    dirList.pop();
+}
+
+function dirHome() {
+    dirList = [];
+    loadDir(0);
+}
+
+async function editItem() {
+    try {
+        const data = {
+            name: newItemWindowInputName.value.trim(),
+            link: newItemWindowInputLink.value.trim(),
+            type: itemState.type,
+            color: itemState.color,
+            icon: itemState.icon,
+        };
+        const response = await fetch(apiBaseUrl + "edit-item?iid=" + itemState.id, {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error while editing an item: ${response.status}`);
+        }
+        const message = await response.json();
+        console.log(message);
+        hideNewItemWindow();
+        loadDir(dirList.at(-1));
+    } catch (error) {
+        console.error("Item edit failed:", error);
+    }
+}
+
+async function deleteItem() {
+    try {
+        const response = await fetch(apiBaseUrl + "delete-item?iid=" + itemState.id, {
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error deleting an item: ${response.status}`);
+        }
+        const message = await response.json();
+        console.log(message);
+        hideDeleteItemWindow();
+        loadDir(dirList.at(-1));
+    } catch (error) {
+        console.error("Item deletion failed:", error);
     }
 }
 

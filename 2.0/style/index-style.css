@@ -332,6 +332,7 @@ body {
 #edit-popup.hide,
 #not-logged-in-window.hide,
 #delete-item-window.hide,
+#no-items-div.hide,
 .hide {
     display: none;
 }
@@ -453,8 +454,10 @@ body {
     width: 100%;
 }
 
-.fade {
-    opacity: 0.5;
+.btn-disable {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 #not-logged-in-window {

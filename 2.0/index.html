@@ -22,13 +22,14 @@
         <main id="window">
             <nav id="nav-panel">
                 <div class="nav-panel-btn-cont">
-                    <button class="btn-hide cursor-pointer-darken">
+                    <button class="btn-hide cursor-pointer-darken"
+                        onclick="dirHome()">
                         <svg class="nav-panel-btn-cont-icon"><use
                                 href="assets/icons/ui-icons.svg#home"></use></svg>
                     </button>
                     <div class="nav-panel-btn-cont-separator"></div>
                     <button class="btn-hide cursor-pointer-darken"
-                        onclick="clearItems()">
+                        onclick="dirUp()" id="dir-up-btn">
                         <svg class="nav-panel-btn-cont-icon"><use
                                 href="assets/icons/ui-icons.svg#dir-up"></use></svg>
                     </button>
@@ -132,7 +133,8 @@
             </div>
             <div id="delete-item-window-buttons-cont">
                 <button id="delete-item-window-button-delete"
-                    class="button-default cursor-pointer-darken">Delete</button>
+                    class="button-default cursor-pointer-darken"
+                    onclick="deleteItem()">Delete</button>
                 <button
                     class="button-default cursor-pointer-darken"
                     onclick="hideDeleteItemWindow()">Cancel</button>
