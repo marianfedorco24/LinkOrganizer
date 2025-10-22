@@ -12,6 +12,10 @@ const notLoggedInWindow = document.getElementById("not-logged-in-window");
 const deleteItemWindow = document.getElementById("delete-item-window");
 const noItemsDiv = document.getElementById("no-items-div");
 const newItemWindowConfirmBtn = document.getElementById("new-item-window-confirm-btn");
+const popup = document.getElementById("popup");
+const popupText = document.getElementById("popup-text");
+const popupIconUse = document.getElementById("popup-icon-use");
+const popupIcon = document.getElementById("popup-icon");
 
 const dirUpBtn = document.getElementById("dir-up-btn");
 
@@ -138,9 +142,27 @@ function loadItem({iid, pid, type, icon, name, link, color}) {
     moreButtonSvgElement.appendChild(moreButtonUseElement);
 }
 
+function handleApiResponse(response) {
+    if (response.display) {
+        displayPopup(response.message, response.messagetype);
+    }
+    if (response.messagetype == "error") {
+        console.error(response.message);
+    }
+    return response;
+}
+
 async function loadDir(pid) {
     dirList.push(pid);
     itemState.pid = pid;
+
+    // dim the dir up button if it is the home dir (0)
+    if (pid == 0) {
+        dirUpBtn.classList.add("btn-disable");
+    } else {
+        dirUpBtn.classList.remove("btn-disable");
+    }
+
     try {
         const response = await fetch(apiBaseUrl + `get-items?pid=${pid}`, {
             method: "GET",
@@ -149,10 +171,12 @@ async function loadDir(pid) {
                 "Content-Type": "application/json",
             },
         });
-        if (!response.ok) {
-            throw new Error(`HTTP error while requesting data: ${response.status}`);
+        const data = handleApiResponse(await response.json());
+        if (response.status == 401) {
+            displayLoginWindow();
+            backdrop.style.pointerEvents = "none";
+            return;
         }
-        const data = await response.json();
 
         // clear the previous loaded items
         clearItems();
@@ -164,19 +188,13 @@ async function loadDir(pid) {
             hideNoItemsPlaceholder();
         }
 
-        // dim the dir up button if it is the home dir (0)
-        if (pid == 0) {
-            dirUpBtn.classList.add("btn-disable");
-        } else {
-            dirUpBtn.classList.remove("btn-disable");
-        }
-
         // go through each item and load it
         data.forEach(item => {
             loadItem(item);
         });
     } catch (error) {
         console.error("Data fetch failed:", error);
+        displayPopup("A server error occured. Please contact the administrator.", "error");
     }
 }
 
@@ -221,13 +239,19 @@ function displayNewItemWindow(type) {
     }
     backdrop.classList.remove("hide");
     newItemWindow.classList.remove("hide");
+    requestAnimationFrame(() => {
+        newItemWindow.classList.add("transition-fade");
+    });
 }
 
 function hideNewItemWindow() {
     newItemWindowInputName.value = "";
     newItemWindowInputLink.value = "";
     backdrop.classList.add("hide");
-    newItemWindow.classList.add("hide");
+    newItemWindow.classList.remove("transition-fade");
+    requestAnimationFrame(() => {
+        newItemWindow.classList.add("hide");
+    });
     selectColor();
 }
 
@@ -305,6 +329,9 @@ function displayEditItemWindow() {
 
     backdrop.classList.remove("hide");
     newItemWindow.classList.remove("hide");
+    requestAnimationFrame(() => {
+        newItemWindow.classList.add("transition-fade");
+    });
 }
 
 function displayLoginWindow() {
@@ -315,6 +342,9 @@ function displayLoginWindow() {
 function displayDeleteItemWindow() {
     backdrop.classList.remove("hide");
     deleteItemWindow.classList.remove("hide");
+    requestAnimationFrame(() => {
+        deleteItemWindow.classList.add("transition-fade");
+    });
 }
 
 function hideDeleteItemWindow() {
@@ -345,7 +375,7 @@ async function createNewItem() {
             color: itemState.color,
             icon: itemState.icon,
         };
-        const response = await fetch(apiBaseUrl + "add-item", {
+        const request = await fetch(apiBaseUrl + "add-item", {
             method: "POST",
             credentials: "include",
             headers: {
@@ -353,14 +383,15 @@ async function createNewItem() {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) {
-            throw new Error(`HTTP error while adding a new item: ${response.status}`);
+
+        const response = handleApiResponse(await request.json());
+        if (response.messagetype == "success") {
+            hideNewItemWindow();
+            loadDir(itemState.pid);
         }
-        const message = await response.json();
-        hideNewItemWindow();
-        loadDir(itemState.pid);
     } catch (error) {
         console.error("Item creation failed:", error);
+        displayPopup("A server error occured. Please contact the administrator.", "error");
     }
 }
 
@@ -384,7 +415,7 @@ async function editItem() {
             color: itemState.color,
             icon: itemState.icon,
         };
-        const response = await fetch(apiBaseUrl + "edit-item?iid=" + itemState.id, {
+        const request = await fetch(apiBaseUrl + "edit-item?iid=" + itemState.id, {
             method: "PATCH",
             credentials: "include",
             headers: {
@@ -392,37 +423,64 @@ async function editItem() {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) {
-            throw new Error(`HTTP error while editing an item: ${response.status}`);
+
+        const response = handleApiResponse(await request.json());
+        if (response.messagetype == "success") {
+            hideNewItemWindow();
+            loadDir(dirList.at(-1));
         }
-        const message = await response.json();
-        console.log(message);
-        hideNewItemWindow();
-        loadDir(dirList.at(-1));
     } catch (error) {
         console.error("Item edit failed:", error);
+        displayPopup("A server error occured. Please contact the administrator.", "error");
     }
 }
 
 async function deleteItem() {
     try {
-        const response = await fetch(apiBaseUrl + "delete-item?iid=" + itemState.id, {
+        const request = await fetch(apiBaseUrl + "delete-item?iid=" + itemState.id, {
             method: "DELETE",
             credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
         });
-        if (!response.ok) {
-            throw new Error(`HTTP error deleting an item: ${response.status}`);
+
+        const response = handleApiResponse(await request.json());
+        if (response.messagetype == "success") {
+            hideDeleteItemWindow();
+            loadDir(dirList.at(-1));
         }
-        const message = await response.json();
-        console.log(message);
-        hideDeleteItemWindow();
-        loadDir(dirList.at(-1));
     } catch (error) {
         console.error("Item deletion failed:", error);
+        displayPopup("A server error occured. Please contact the administrator.", "error");
     }
+}
+
+function sleep(s) {
+    return new Promise(resolve => setTimeout(resolve, s * 1000));
+}
+
+async function displayPopup(text, type) {
+    hidePopupInstant();
+    popupText.innerHTML = text;
+    if (type == "success") {
+        popupIconUse.setAttribute("href", "assets/icons/ui-icons.svg#success");
+        popupIcon.classList.remove("popup-icon-red");
+        popupIcon.classList.add("popup-icon-green");
+    } else {
+        popupIconUse.setAttribute("href", "assets/icons/ui-icons.svg#error");
+        popupIcon.classList.remove("popup-icon-green");
+        popupIcon.classList.add("popup-icon-red");
+    }
+    popup.classList.add("popup-show");
+    await sleep(3);
+    popup.classList.remove("popup-show");
+}
+function hidePopupInstant() {
+    popup.style.transition = "none"; // disable animation
+    popup.classList.remove("popup-show"); // jump to end state
+    popup.offsetHeight; // force browser reflow
+    popup.style.transition = ""; // re-enable for future use
 }
 
 loadColors();

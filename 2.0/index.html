@@ -17,7 +17,8 @@
                 <img id="logo" src="assets/fedorcodev_logo.svg"
                     alt="fedorco.dev logo">
             </a>
-            <h1 id="title">Link Organizer</h1>
+            <a id="title" href="https://linkorganizer.fedorco.dev">Link
+                Organizer</a>
         </header>
         <main id="window">
             <nav id="nav-panel">
@@ -109,13 +110,18 @@
             <div class="alert-icon-cont">
                 <svg id="not-logged-in-window-icon"><use
                         href="assets/icons/ui-icons.svg#not-logged-in"></use></svg>
-                <span id="not-logged-in-window-text">You are not logged
-                    in.<br>Log in via your fedorco.dev account to use across
-                    all
-                    my projects.</span>
+                <span
+                    class="not-logged-in-window-text not-logged-in-window-text-heading">You
+                    are not logged
+                    in.</span>
+                <span
+                    class="not-logged-in-window-text">Log
+                    in via your fedorco.dev account to use across all my
+                    projects.</span>
             </div>
             <button id="not-logged-in-window-fedorcodev-button"
-                class="cursor-pointer-darken">
+                class="cursor-pointer-darken"
+                onclick="window.location.href = 'https://fedorco.dev/login?r=linkorganizer'">
                 <svg id="not-logged-in-window-fedorcodev-icon"><use
                         href="assets/icons/ui-icons.svg#fedorcodev-logo-transparent"></use></svg>
 
@@ -139,6 +145,14 @@
                     class="button-default cursor-pointer-darken"
                     onclick="hideDeleteItemWindow()">Cancel</button>
             </div>
+        </div>
+
+        <div id="popup">
+            <svg id="popup-icon">
+                <use id="popup-icon-use"
+                    href="#"></use>
+            </svg>
+            <span id="popup-text"></span>
         </div>
 
         <script src="script/index-script.js"></script>
