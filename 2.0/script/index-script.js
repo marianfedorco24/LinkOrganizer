@@ -483,5 +483,10 @@ function hidePopupInstant() {
     popup.style.transition = ""; // re-enable for future use
 }
 
+function redirectFedorcodevLogin() {
+    document.cookie = "redirect=linkorganizer; domain=.fedorco.dev; path=/; max-age=90";
+    window.location.href = "https://fedorco.dev/login";
+}
+
 loadColors();
 loadDir(0);
